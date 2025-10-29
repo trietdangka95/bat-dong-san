@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String   @unique
+  logoUrl     String?
+  theme       String?  // e.g. "light" | "dark" | "blue"
+  primaryColor String? // e.g. "#3B82F6" for blue theme
+  secondaryColor String? // e.g. "#1E40AF" for darker blue
+  config      Json?    // Additional tenant-specific configuration
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  users       User[]
+  properties  Property[]
+  
+  @@map("tenants")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  password  String
+  role      String   @default("user") // "admin" | "user"
+  tenantId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@unique([email, tenantId]) // Email unique per tenant
+  @@map("users")
+}
+
+model Property {
+  id          String   @id @default(cuid())
+  title       String
+  price       Int      // Price in VND
+  address     String
+  description String?
+  bedrooms    Int      @default(0)
+  bathrooms   Int      @default(0)
+  area        String   // e.g. "85m2", "Trên 300m2"
+  propertyType String  // e.g. "Căn hộ", "Biệt thự", "Đất vườn", etc.
+  imageUrl    String?
+  isActive    Boolean  @default(true)
+  tenantId    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relations
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  
+  @@map("properties")
+}
