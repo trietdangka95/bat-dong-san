@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Button from "../Button";
 
 const Banner = () => {
@@ -21,6 +22,20 @@ const Banner = () => {
     { name: "Nhà phố", icon: "🏘️" },
     { name: "Văn phòng", icon: "💼" },
   ];
+
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleToggleAdvanced = () => {
+    const hasAdvanced = searchParams.get("advanced") === "1";
+    const url = new URL(window.location.href);
+    if (hasAdvanced) {
+      url.searchParams.delete("advanced");
+    } else {
+      url.searchParams.set("advanced", "1");
+    }
+    router.push(url.pathname + (url.search ? url.search : ""));
+  };
 
   return (
     <section className="relative min-h-[30vh] flex items-center justify-center overflow-hidden pt-20">
@@ -79,9 +94,20 @@ const Banner = () => {
               placeholder="Nhập dự án bạn đang quan tâm...."
               className="flex-1 px-4 py-3 border border-gray-300 rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
-            <Button variant="secondary" size="md" type="submit">
-              Tìm kiếm
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="secondary" size="md" type="submit">
+                Tìm kiếm
+              </Button>
+              <Button
+                variant="outline"
+                size="md"
+                type="button"
+                onClick={handleToggleAdvanced}
+                className="whitespace-nowrap"
+              >
+                Nâng cao
+              </Button>
+            </div>
           </div>
         </div>
       </div>

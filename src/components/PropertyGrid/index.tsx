@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import PropertyCard from "../PropertyCard";
 import Button from "../Button";
 import Filter from "../Filter";
@@ -18,6 +19,9 @@ interface FilterData {
 const PropertyGrid = () => {
   const [filteredProperties, setFilteredProperties] = useState<any[]>([]);
   const [isFiltered, setIsFiltered] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const showAdvanced = searchParams.get("advanced") === "1";
 
   const properties = [
     {
@@ -197,8 +201,10 @@ const PropertyGrid = () => {
           </p>
         </div>
 
-        {/* Filter Component */}
-        <Filter onFilter={handleFilter} onReset={handleResetFilter} />
+        {/* Advanced Filter (toggle by banner button) */}
+        {showAdvanced && (
+          <Filter onFilter={handleFilter} onReset={handleResetFilter} />
+        )}
 
         {/* Property Grid */}
         {displayProperties.length > 0 ? (
@@ -229,10 +235,23 @@ const PropertyGrid = () => {
         )}
 
         {/* Load More Button */}
-        <div className="text-center mt-12">
+        <div className="flex justify-center gap-3 mt-12">
           <Button variant="secondary" size="lg">
             Xem thêm dự án
           </Button>
+          {showAdvanced && (
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                const url = new URL(window.location.href);
+                url.searchParams.delete("advanced");
+                router.push(url.pathname + (url.search ? url.search : ""));
+              }}
+            >
+              Ẩn bộ lọc
+            </Button>
+          )}
         </div>
       </div>
     </section>
