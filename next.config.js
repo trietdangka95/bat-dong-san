@@ -4,6 +4,15 @@ const nextConfig = {
   async headers() {
     return [
       {
+        source: "/api/:path*",
+        headers: [
+          {
+            key: "Content-Type",
+            value: "application/json; charset=utf-8",
+          },
+        ],
+      },
+      {
         source: "/(.*\\.html|/)$",
         headers: [
           {

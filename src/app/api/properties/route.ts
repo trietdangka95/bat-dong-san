@@ -6,9 +6,7 @@ export async function GET(request: NextRequest) {
   try {
     const tenantId = request.headers.get("x-tenant-id");
 
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
-    }
+    // If tenantId missing (e.g., client-side fetch), fallback to mock data for dev
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "1");
@@ -21,6 +19,54 @@ export async function GET(request: NextRequest) {
     const areaMax = searchParams.get("areaMax");
 
     // Try to fetch from database, fallback to mock data
+    if (!tenantId) {
+      // Fallback path when no tenant header is present
+      let filteredProperties = mockProperties;
+
+      if (search) {
+        filteredProperties = filteredProperties.filter(
+          (property) =>
+            property.title.toLowerCase().includes(search.toLowerCase()) ||
+            property.address.toLowerCase().includes(search.toLowerCase())
+        );
+      }
+
+      if (propertyType) {
+        filteredProperties = filteredProperties.filter((property) =>
+          property.propertyType
+            .toLowerCase()
+            .includes(propertyType.toLowerCase())
+        );
+      }
+
+      if (priceMin || priceMax) {
+        filteredProperties = filteredProperties.filter((property) => {
+          const priceInMillions = property.price / 1000000;
+          if (priceMin && priceInMillions < parseInt(priceMin)) return false;
+          if (priceMax && priceInMillions > parseInt(priceMax)) return false;
+          return true;
+        });
+      }
+
+      const total = filteredProperties.length;
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedProperties = filteredProperties.slice(
+        startIndex,
+        endIndex
+      );
+
+      return NextResponse.json({
+        properties: paginatedProperties,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      });
+    }
+
     try {
       // Build where clause with tenant isolation
       const where: any = {

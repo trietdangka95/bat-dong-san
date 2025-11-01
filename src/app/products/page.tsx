@@ -1,7 +1,8 @@
 import { getTenantFromHeaders } from "@/lib/tenant";
 import { TenantProvider } from "@/contexts/TenantContext";
 import ThemedLayout from "@/components/ThemedLayout";
-import PropertyGridAPI from "@/components/PropertyGridAPI";
+import ProductsGridAPI from "@/components/ProductsGridAPI";
+import Filter from "@/components/Filter";
 
 export default async function ProductsPage() {
   const tenant = await getTenantFromHeaders();
@@ -106,8 +107,23 @@ export default async function ProductsPage() {
             </div>
           </section>
 
-          {/* Properties Section */}
-          <PropertyGridAPI />
+          {/* Properties Section - Different layout from home */}
+          <section className="py-12 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                {/* Sidebar filter */}
+                <aside className="lg:col-span-1">
+                  <div className="sticky top-24">
+                    <Filter onFilter={() => {}} onReset={() => {}} />
+                  </div>
+                </aside>
+                {/* Grid */}
+                <div className="lg:col-span-3">
+                  <ProductsGridAPI />
+                </div>
+              </div>
+            </div>
+          </section>
 
           {/* Footer */}
           <footer
